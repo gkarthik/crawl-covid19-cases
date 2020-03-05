@@ -6,32 +6,39 @@ import json
 import covid19.config
 from covid19.config import slack_sandiego_post_url
 from datetime import datetime as dt
+import re
 
 class FloridaSpider(scrapy.Spider):
     name = 'florida'
     allowed_domains = ['www.floridahealth.gov']
-    start_urls = ["http://www.floridahealth.gov/diseases-and-conditions/COVID-19/_documents/covid19-daily-numbers.txt"]
+    start_urls = ["http://www.floridahealth.gov/diseases-and-conditions/COVID-19/"]
     # Ajax request from http://www.floridahealth.gov/diseases-and-conditions/COVID-19/index.html
 
     def parse(self, response):
-        text = response.text
+        div = response.xpath("//*[@class=\"split_70-30_left\"]/*[@class=\"wysiwyg_content clearfix\"]")
+        text = div[1].xpath("block/div//text()").extract()
         item = TestingStats()
-        split_text = text.split("*")
-        date = split_text[0]
-        date = dt.strptime(date.replace("p.m.", "PM"), "%H:%M %p ET %d/%m/%Y")
+        date_text = div[1].xpath("block/p/sup//text()").extract_first()[6:]
+        date = dt.strptime(date_text.replace("p.m.", "PM").replace("a.m.", "AM"), "%H:%M %p ET %d/%m/%Y")
         item["date"] = date.strftime("%Y-%m-%d %H:%M %p")
         item["Local"] = {
             "name": "Florida",
-            "positive": split_text[1],
-            "presumedPositive": split_text[2],
-            "pending": split_text[3],
-            "negative": split_text[4],
-            "pui": split_text[5]
+            "positive": re.findall(r"^[0-9]+", text[0])[0],
+            "presumedPositive": re.findall(r"^[0-9]+", text[1])[0]
+        }
+        item["Repatriated"] = {
+            "name": "Repatriated Cases",
+            "positive": re.findall(r"^[0-9]+", text[2])[0]
         }
         item["NonLocal"] = {
             "name": "Non Florida",
-            "positive": split_text[-4],
-            "presumedPositive": split_text[-3]
+            "positive": re.findall(r"^[0-9]+", text[3])[0]
+        }
+        item["Combined"] = {
+            "name": "Florida State",
+            "negative": re.findall(r"^[0-9]+", text[4])[0],
+            "pending": re.findall(r"^[0-9]+", text[5])[0],
+            "pui": re.findall(r"^[0-9]+", text[6])[0]
         }
         print(item.toAsciiTable())
         return item
