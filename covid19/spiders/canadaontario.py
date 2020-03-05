@@ -22,7 +22,7 @@ class CanadaOntarioSpider( scrapy.Spider ):
 
         date = response.xpath( '//*[@id="pho-main-content-grid"]/div[5]/div/div/p[4]/text()' ).get()
         date = date.replace( ".", "" )
-        date = dt.strptime( date, "%B %d, %Y at %H:%M %p ET")
+        date = dt.strptime( date, "%B %d, %Y at %I:%M %p ET")
 
         case_table = response.xpath( '//*[@id="pho-main-content-grid"]/div[5]/div/div/table/tbody' )
         for i, row in enumerate( case_table.xpath( 'tr' )[1 :-2] ) :
