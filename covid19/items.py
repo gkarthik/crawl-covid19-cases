@@ -21,16 +21,17 @@ class TestingStats(scrapy.Item):
     date = scrapy.Field()
     Local = scrapy.Field(serializer = CasesCategory)
     FederalQuarantine = scrapy.Field(serializer = CasesCategory)
+    Repatriated = scrapy.Field(serializer = CasesCategory)
     NonLocal = scrapy.Field(serializer = CasesCategory)
     Combined = scrapy.Field(serializer = CasesCategory)
 
     def getTotal(self, key = "positive"):
         categories = sorted([i for i in self.keys() if i!= "date"])
-        return sum([int(self[i][key]) for i in categories])
+        return sum([int(self[i][key]) for i in categories if key in self[i].keys() and self[i][key] != "NA"])
 
     def getCategoryTotal(self, key):
         case_categories = [i for i in self[key].keys() if i != "name"]
-        return sum([int(self[key][i]) for i in case_categories])
+        return sum([int(self[key][i]) for i in case_categories if self[key][i] != "NA"])
 
     def toAsciiTable(self):
         # Get case categories for which data exists
