@@ -17,3 +17,7 @@ slack_sandiego_post_url = "<post-url>"
 ```
 scrapy crawl --logfile logs/$(date +%Y-%m-%d-%H-%M.log) -o data/items.csv sandiego
 ```
+
+## Contribution
+
+Pick a region and write a spider. I've tried to keep the classes TestingStats and CaseCategories as general as possible.
