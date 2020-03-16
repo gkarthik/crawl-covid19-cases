@@ -11,8 +11,8 @@ class sandiegoSpider(scrapy.Spider):
     name = 'sandiego'
     allowed_domains = ['www.sandiegocounty.gov']
     start_urls = ['https://www.sandiegocounty.gov/content/sdc/hhsa/programs/phs/community_epidemiology/dc/2019-nCoV/status.html']
-    objs = ["Local", "FederalQuarantine", "NonLocal"]
-    case_categories = ["positive", "presumedPositive", "pending", "negative"]
+    objs = ["Local", "FederalQuarantine", "NonLocal", "Total"]
+    case_categories = ["Age groups", "0-17 years", "18-64 years", "65+ years", "Age unknown", "Hospitalized", "Deaths"]
     names = ["San Diego County", "Federal Quarantine", "Non-San Diego County Residents"]
     
     def parse(self, response):
@@ -25,8 +25,11 @@ class sandiegoSpider(scrapy.Spider):
                 date = update_date_text[update_date_text.find("Updated ") + len("Updated"):].strip()
                 date = dt.strptime(date, "%B %d, %Y")
                 item["date"] = date.strftime("%Y-%m-%d %H:%M %p")
-            elif ind >= 2:      # Case counts
-                for cell_ind, cell in enumerate(row.xpath("td//text()").extract()[1:]):
+            elif ind in [4,5,6,7,12,13]:      # Case counts
+                for cell_ind, cell in enumerate(row.xpath("td//text()").extract()[1:-1]):
+                    cell = cell.replace(u'\xa0', u' ')
+                    if cell == " ":
+                        continue
                     if self.objs[cell_ind] not in item.keys():
                         item[self.objs[cell_ind]] = {
                             "name": self.names[cell_ind]
