@@ -12,7 +12,7 @@ class sandiegoSpider(scrapy.Spider):
     allowed_domains = ['www.sandiegocounty.gov']
     start_urls = ['https://www.sandiegocounty.gov/content/sdc/hhsa/programs/phs/community_epidemiology/dc/2019-nCoV/status.html']
     objs = ["Local", "FederalQuarantine", "NonLocal", "Total"]
-    case_categories = ["Age groups", "0-17 years", "18-64 years", "65+ years", "Age unknown", "Hospitalized", "Deaths"]
+    case_categories = ["0-9 years", "10-19 years", "20-29 years", "30-39 years", "40-49 years", "50-59 years", "60-69 years", "70-79 years", "80+ years", "Age unknown", "Hospitalized", "Deaths"]
     names = ["San Diego County", "Federal Quarantine", "Non-San Diego County Residents"]
     
     def parse(self, response):
@@ -25,7 +25,7 @@ class sandiegoSpider(scrapy.Spider):
                 date = update_date_text[update_date_text.find("Updated ") + len("Updated"):].strip()
                 date = dt.strptime(date, "%B %d, %Y")
                 item["date"] = date.strftime("%Y-%m-%d %H:%M %p")
-            elif ind in [4,5,6,7,12,13]:      # Case counts
+            elif ind in [4,5,6,7,8,9,10,11,12,13, 18, 19]:      # Case counts
                 for cell_ind, cell in enumerate(row.xpath("td//text()").extract()[1:-1]):
                     cell = cell.replace(u'\xa0', u' ')
                     if cell == " ":

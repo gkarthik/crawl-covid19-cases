@@ -52,5 +52,5 @@ class TestingStats(scrapy.Item):
             print(i)
             row_str += row_format.format(*i)
         row_str += "```\n"
-        row_str += "Total cases: {}".format(sum([self.getCategoryTotal(j) for j in categories]))
+        row_str += "Total cases: {}".format(sum([self.getCategoryTotal(j) for j in categories if j[0] not in ["Hospitalized", "Deaths"]]))
         return row_str
