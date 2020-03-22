@@ -30,7 +30,7 @@ class TestingStats(scrapy.Item):
         return sum([int(self[i][key]) for i in categories if key in self[i].keys() and self[i][key] != "NA"])
 
     def getCategoryTotal(self, key):
-        case_categories = [i for i in self[key].keys() if i != "name"]
+        case_categories = [i for i in self[key].keys() if i not in ["name", "Hospitalized", "Deaths", "Intensive Care"]]
         return sum([int(self[key][i]) for i in case_categories if self[key][i] != "NA"])
 
     def toAsciiTable(self):
@@ -45,12 +45,11 @@ class TestingStats(scrapy.Item):
         rows.append([""])
         rows[0].extend([self[i]["name"] for i in categories])
         rows.extend([[i.capitalize()] + [self[j][i] if j in self.keys() and i in self[j].keys() else "NA" for j in categories] for i in case_categories])
-        rows.append(["Total"] + [self.getCategoryTotal(j) for j in categories])
+        rows.append(["Total"] + [self.getCategoryTotal(j) for j in categories if j[0] not in ["Hospitalized", "Deaths", "Intensive care"]])
         row_str = "Last updated: {}".format(dt.strftime(dt.strptime(self["date"], "%Y-%m-%d %H:%M %p"), "%Y-%m-%d"))
         row_str += "\n```\n"
         for i in rows:
-            print(i)
             row_str += row_format.format(*i)
         row_str += "```\n"
-        row_str += "Total cases: {}".format(sum([self.getCategoryTotal(j) for j in categories if j[0] not in ["Hospitalized", "Deaths"]]))
+        row_str += "Total cases: {}".format(sum([self.getCategoryTotal(j) for j in categories]))
         return row_str
